@@ -1,0 +1,10 @@
+node_modules
+.env
+yarn-error.log
+.DS_Store
+yarn.lock
+.prettierrc
+database.sqlite
+**/.DS_Store
+.husky
+.vscode
