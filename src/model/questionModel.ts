@@ -54,14 +54,14 @@ Question.init(
       allowNull: false
     },
     examId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       references: {
         model: Exam,
         key: 'examId'
       }
     },
     lecturerId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       references: {
         model: Lecturer,
         key: 'lecturerId'

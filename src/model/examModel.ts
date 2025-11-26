@@ -62,7 +62,7 @@ Exam.init(
       allowNull: false
     },
     lecturerId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       references: {
         model: Lecturer,
         key: 'lecturerId'

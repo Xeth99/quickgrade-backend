@@ -43,22 +43,23 @@ sequelize
     console.log('Unable to connect to the database:', err)
   })
 
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
     console.log('All models were synchronized successfully.')
   })
 const app = express()
 
-// app.use(
-//   session({
-//     secret: process.env.secret ?? '',
-//     resave: false,
-//     saveUninitialized: true
-//   })
-// )
 app.use(
   cors({
     origin: 'https://quickgrade-client.onrender.com',
     credentials: true
+  })
+)
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET ?? '',
+    resave: false,
+    saveUninitialized: true
   })
 )
 
