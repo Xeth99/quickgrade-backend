@@ -55,6 +55,12 @@ app.use(
   })
 )
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Welcome to QuickGrade API"
+  })
+})
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET ?? '',
