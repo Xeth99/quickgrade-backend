@@ -12,9 +12,10 @@ export const getExamResults = async (req: Request, res: Response): Promise<any> 
   try {
     const { courseCode, session, semester } = req.params
     if (!courseCode || !session || !semester) {
-      const errorMessage = 'Course code, Session, and Semester are required'
-      res.render('error', { errorMessage })
-    } else {
+      return res.status(400).json({
+       error: "Course code, Session, and Semester are required"
+     })
+    } 
       const examResults = await Grading.findAll({
         include: [
           {
@@ -37,15 +38,9 @@ export const getExamResults = async (req: Request, res: Response): Promise<any> 
             }
           }
         ]
-
       })
-
-      res.render('result', { examResults })
-      res.status(200).json(examResults)
-    }
+     return res.status(200).json(examResults)
   } catch (error) {
-    const errorMessage = 'Internal Server Error'
-    res.render('error', { errorMessage })
-    // res.status(500).json({ error: 'Internal Server Error' })
+    res.status(500).json({ error })
   }
 }

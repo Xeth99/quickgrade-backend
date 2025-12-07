@@ -43,7 +43,7 @@ sequelize
     console.log('Unable to connect to the database:', err)
   })
 
-sequelize.sync({ alter: true }).then(() => {
+sequelize.sync().then(() => {
     console.log('All models were synchronized successfully.')
   })
 const app = express()
@@ -101,8 +101,10 @@ app.use(function (err: any, req: Request, res: Response, next: NextFunction) {
   res.locals.error = req.app.get('env') === 'development' ? err : {}
 
   // render the error page
-  res.status(err.status || 500)
-  res.render('error')
+  res.status(err.status || 500).json({
+    message: err.message,
+    error: process.env.NODE_ENV === "development" ? err : {}
+  })
 })
 
 export default app
