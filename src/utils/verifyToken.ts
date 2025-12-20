@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import Student from '../model/studentModel'
 import Lecturer from '../model/lecturerModel'
 
-const secret: string = (process.env.secret ?? '')
+const secret: string = (process.env.SESSION_SECRET ?? '')
 export async function checkAndVerifyStudentToken (req: Request, res: Response): Promise<void> {
   try {
     // const token = req.cookies.token

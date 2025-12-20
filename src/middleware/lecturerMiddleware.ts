@@ -6,14 +6,14 @@ import Lecturer from '../model/lecturerModel'
 interface AuthRequestLecturer extends Request {
   lecturer?: { lecturerId: string } // Add the user property
 }
-const secret: string = (process.env.secret ?? '')
+const secret: string = (process.env.SESSION_SECRET ?? '')
 
 export async function authenticateLecturer (req: AuthRequestLecturer, res: Response, next: NextFunction): Promise<void> {
   try {
     const token = req.headers.authorization?.split(' ')[1]
     console.log('token', token)
     if (!token) {
-      res.json({ noTokenError: 'Unauthorized - Token not provided' })
+      res.status(401).json({ noTokenError: 'Unauthorized - Token not provided' })
     } else {
       const decoded = jwt.verify(token, secret) as { loginkey: string }
 
@@ -28,10 +28,10 @@ export async function authenticateLecturer (req: AuthRequestLecturer, res: Respo
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
       // Handle the case when the token is expired
-      res.json({ tokenExpiredError: 'Unauthorized - Token has expired' })
+      res.status(401).json({ tokenExpiredError: 'Unauthorized - Token has expired' })
     } else {
       // Handle other token verification errors
-      res.json({ verificationError: 'Unauthorized - Token verification failed' })
+      res.status(401).json({ verificationError: 'Unauthorized - Token verification failed' })
     }
   }
 }

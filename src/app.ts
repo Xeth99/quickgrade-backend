@@ -22,7 +22,7 @@ import gradeRouter from './routes/grade'
 import examResultRouter from './routes/examResultRoute'
 import examTimeTableRoute from './routes/examinationTimetable_Route'
 import protectedRouter from './routes/verifyTokenRoute'
-const secret: string = (process.env.secret ?? '')
+const secret: string = (process.env.SESSION_SECRET ?? '')
 interface customCookie extends cookieParser.CookieParseOptions {
   domain: string
   httpOnly: boolean
@@ -39,8 +39,6 @@ sequelize
   })
   .catch((err) => {
     console.log('Unable to connect to the database:', err)
-  }).catch((err) => {
-    console.log('Unable to connect to the database:', err)
   })
 
 sequelize.sync().then(() => {
@@ -50,7 +48,10 @@ const app = express()
 
 app.use(
   cors({
-    origin: 'https://quickgrade-client.onrender.com',
+    origin: [
+      'https://quickgrade-server-cu5g.onrender.com',
+      "http://localhost:4000"
+    ],
     credentials: true
   })
 )
@@ -61,26 +62,39 @@ app.get("/", (req, res) => {
   })
 })
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET ?? '',
-    resave: false,
-    saveUninitialized: true
-  })
-)
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET ?? '',
+//     resave: false,
+//     saveUninitialized: true
+//   })
+// )
 
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-app.use(cookieParser(secret, {
-  domain: '.onrender.com',
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none', // to allow  cookie to be sent with cross-site requests
-  path: '/' // to make cookie available in all path in the domain
-} as customCookie)
+app.use(cookieParser(secret))
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET ?? '',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    }
+  })
 )
+// app.use(cookieParser(secret, {
+//   domain: '.onrender.com',
+//   httpOnly: true,
+//   secure: true,
+//   sameSite: 'none', // to allow  cookie to be sent with cross-site requests
+//   path: '/' // to make cookie available in all path in the domain
+// } as customCookie)
+// )
 app.use(express.static(path.join(__dirname, '../', 'public')))
 
 app.use('/otp', otpRouter)

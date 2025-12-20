@@ -5,14 +5,15 @@ import Lecturer from './lecturerModel'
 import Student from './studentModel'
 import Session from './sessionModel'
 import Semester from './semesterModel'
+import Department from './departmentModel'
 
 class Courses extends Model {
   static associate (models: any): void {
-    Courses.belongsToMany(Student, { through: 'StudentCourses', as: 'students' })
-    Courses.belongsToMany(Lecturer, { through: 'LecturerCourses', as: 'lecturers' })
-
-    Courses.belongsTo(Session, { foreignKey: 'session', as: 'courseSession' })
-    Courses.belongsTo(Semester, { foreignKey: 'semester', as: 'courseSemester' })
+    Courses.belongsToMany(Student, { through: 'StudentCourses', foreignKey: 'courseId', as: 'students' })
+    Courses.belongsToMany(Lecturer, { through: 'LecturerCourses', foreignKey: 'courseId', as: 'lecturers' })
+    Courses.belongsTo(Session, { foreignKey: 'sessionId', as: 'session' })
+    Courses.belongsTo(Semester, { foreignKey: 'semesterId', as: 'semester' })
+    Courses.belongsTo(Department, {foreignKey: 'departmentId', as: 'department'})
   }
 }
 
@@ -36,22 +37,30 @@ Courses.init(
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    session: {
-      type: DataTypes.STRING,
+    sessionId: {
+      type: DataTypes.UUID,
       allowNull: false
     },
-    semester: {
-      type: DataTypes.STRING,
+    // session: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false
+    // },
+    semesterId: {
+      type: DataTypes.UUID,
       allowNull: false
     },
-    faculty: {
-      type: DataTypes.STRING,
+    // semester: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false
+    // },
+    departmentId: {
+      type: DataTypes.UUID,
       allowNull: false
-    },
-    department: {
-      type: DataTypes.STRING,
-      allowNull: false
-    }
+    }, 
+    // department: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false
+    // }
   },
   {
     sequelize,

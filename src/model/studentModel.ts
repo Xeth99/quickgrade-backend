@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize'
 import sequelize from '../database/database'
 import Courses from '../model/courseModel'
 import { v4 as uuidv4 } from 'uuid'
+import Department from './departmentModel'
 
 class Student extends Model {
   studentId!: string
@@ -23,6 +24,10 @@ class Student extends Model {
     Student.belongsToMany(Courses, {
       through: 'StudentCourses',
       as: 'courses'
+    })
+    Student.belongsTo(Department, {
+      foreignKey: 'departmentId',
+      as: 'department'
     })
   }
 }

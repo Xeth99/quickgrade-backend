@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken'
 import StudentResponse from '../model/studentResponseModel'
 import Grading from '../model/gradingModel'
 
-const secret: string = (process.env.secret ?? '')
+const secret: string = (process.env.SESSION_SECRET ?? '')
 
 export const lecturerSignup = async (
   req: Request,
@@ -24,13 +24,13 @@ export const lecturerSignup = async (
     const existingLecturer = await Lecturer.findOne({ where: { email } })
 
     if (existingLecturer) {
-      res.json({
+      res.status(400).json({
         existingLecturerError: 'Lecturer already exists'
       })
     } else {
       const hashedPassword = await bcrypt.hash(password, 12)
       const noOfLecturer = (await Lecturer.count() + 1).toString().padStart(4, '0')
-      const employeeID = `QUICK/LT/${faculty.toUpperCase().slice(0, 3)}/${noOfLecturer}`
+      const employeeID = `ELQNCE/LT/${faculty.toUpperCase().slice(0, 3)}/${noOfLecturer}`
       const createdLecturer = await Lecturer.create({
         firstName,
         lastName,
@@ -43,14 +43,14 @@ export const lecturerSignup = async (
       })
       // sending employeeID  and password to Lecturer email
       if (!createdLecturer) {
-        res.json({
+        res.status(400).json({
           failedSignup: 'Lecturer signup failed'
         })
       } else {
         const lecturerDetail = await Lecturer.findOne({ where: { email } })
 
         if (!lecturerDetail) {
-          res.json({ lecturerNotFoundError: 'Lecturer record not found' })
+          res.status(400).json({ lecturerNotFoundError: 'Lecturer record not found' })
         } else {
           const totpSecret = speakeasy.generateSecret({ length: 20 })
 
@@ -66,21 +66,20 @@ export const lecturerSignup = async (
 
           const mailOptions = {
             from: {
-              name: 'QuickGrade App',
-              address: 'quickgradedecagon@gmail.com'
+              name: 'EloQuence App',
+              address: 'cxz3th@gmail.com'
             },
             to: email,
-            subject: 'Quick Grade App - Email Verification Code',
+            subject: 'EloQuence - Email Verification Code',
             text: `TOTP: ${lecturerDetail.otp}`,
-            html: `<h3>Hi there,
-        Thank you for signing up for QuickGrade. Copy OTP below to verify your email:</h3>
-        <h1>${lecturerDetail.otp}</h1>
-        <h3>This OTP will expire in 10 minutes. If you did not sign up for a QuickGrade account,
+            html: `<h2>Dear ${lecturerDetail.dataValues.lastName}, </h2> <br>
+        <h3>Thank you for signing up for EloQuence. Copy OTP below to verify your email:
+        <h1>${lecturerDetail.otp}</h1> <br>
+        This OTP will expire in 10 minutes. If you did not sign up for EloQuence account,
         you can safely ignore this email. <br>
-        <br>
 
         Best regards, <br>
-        The QuickGrade Team</h3>`
+        The EloQuence Team</h3>`
           }
           await transporter.sendMail(mailOptions)
           res.json({ successfulSignup: 'lecturer signup successful' })
@@ -89,7 +88,7 @@ export const lecturerSignup = async (
     }
   } catch (error: any) {
     res.status(500).json({
-      message: ` error: ${error}`
+      message: error
     })
   }
 }
@@ -104,7 +103,7 @@ export const lecturerLogin = async (
     const existingLecturer = await Lecturer.findOne({ where: { employeeID } })
 
     if (!existingLecturer) {
-      res.json({
+      res.status(400).json({
         lecturerNotFoundError: 'Invalid lecturerId'
       })
     } else {
@@ -113,12 +112,12 @@ export const lecturerLogin = async (
         existingLecturer.dataValues.password
       )
       if (!isPasswordValid) {
-        res.json({
+        res.status(400).json({
           inValidPassword: 'Invalid password'
         })
       } else {
         const token = jwt.sign({ loginkey: existingLecturer.dataValues.lecturerId }, secret, { expiresIn: '1h' })
-        res.json({ token })
+        res.json({ token: token })
         // res.cookie('lecturerToken', token)
 
         // res.json({
@@ -128,7 +127,7 @@ export const lecturerLogin = async (
     }
   } catch (error: any) {
     res.status(500).json({
-      internalServerError: `Error: ${error}`
+      internalServerError: error
     })
   }
 }
@@ -138,7 +137,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   const user = await Lecturer.findOne({ where: { email } })
 
   if (!user) {
-    res.json({ userNotFoundError: 'User not found' })
+    res.status(404).json({ userNotFoundError: 'User not found' })
     return
   } else {
     const token = crypto.randomBytes(20).toString('hex')
@@ -147,11 +146,11 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     await user.save()
 
     const mailOptions = {
-      from: 'quickgradedecagon@gmail.com',
+      from: 'cxz3th@gmail.com',
       to: email,
       subject: 'Password Reset',
       // text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://${req.headers.host}/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://localhost:5173/lecturers/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
+      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://localhost:4000/lecturers/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
     }
 
     await transporter.sendMail(mailOptions)
@@ -196,11 +195,11 @@ export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
     const email = lecturer?.dataValues.email
 
     if (!lecturer) {
-      res.json({ invalidOtp: 'Invalid otp' })
+      res.status(400).json({ invalidOtp: 'Invalid otp' })
     } else {
       const now = new Date()
       if (now > lecturer.otpExpiration) {
-        res.json({ expiredOtpError: 'OTP has expired' })
+        res.status(400).json({ expiredOtpError: 'OTP has expired' })
         return
       }
 
@@ -208,29 +207,25 @@ export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
       // res.redirect('http://localhost:5173/students/reset-password')
       const mailOptions = {
         from: {
-          name: 'QuickGrade App',
-          address: 'quickgradedecagon@gmail.com'
+          name: 'EloQuence App',
+          address: 'cxz3th@gmail.com'
         },
         to: email,
-        subject: 'Quick Grade App - Login Details',
+        subject: 'EloQuence - Login Details',
         text: 'Login Detail',
-        html: `<h3>Hi there,
-          Your Account has been successfully created and Email verification is successful. kindly find your login details below:</h3>
-
+        html: `<h2>Dear ${lecturer.dataValues.firstName},</h2> <br>
+          <h3>Your Account has been successfully created and Email verification is successful. kindly find your login details below: <br>
           <h1> EmployeeID: ${lecturer.dataValues.employeeID}</h1>
           <br>
-          <br>
-          
-
           <h3>Best regards,<br>
-          <h3>The QuickGrade Team</h3>`
+          <h3>The EloQuence Team</h3>`
       }
 
       await transporter.sendMail(mailOptions)
       res.json({ OtpVerificationSuccess: 'OTP verified successfully' })
     }
   } catch (error) {
-    res.json({ internalServerError: 'Internal Server Error' })
+    res.status(500).json({ error })
   }
 }
 
@@ -256,7 +251,7 @@ export const updateLecturerPassword = async (req: AuthRequest, res: Response): P
 
     // Update the user's password
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    res.status(500).json({ error })
   }
 }
 
@@ -272,7 +267,7 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
     })
 
     if (!courses) {
-      res.json({
+      res.status(400).json({
         message: 'courses not available'
       })
     } else {
@@ -282,6 +277,7 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
       })
     }
   } catch (error) {
+    res.status(500).json({error})
   }
 }
 
@@ -362,11 +358,12 @@ export const setExamQuestions = async (req: Request, res: Response): Promise<voi
       }
     }))
     if (!createdQuestions) {
-      console.log('unable to create questions')
+      res.status(400).json({ error: 'Questions not created' })
     } else {
       res.json({ examQuestionCreated: 'exam created successfully' })
     }
   } catch (error) {
+    res.status(500).json({ error })
   }
 }
 

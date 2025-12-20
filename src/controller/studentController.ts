@@ -11,7 +11,7 @@ import speakeasy from 'speakeasy'
 import Question from '../model/questionModel'
 import StudentResponse from '../model/studentResponseModel'
 
-const secret: string = (process.env.secret ?? '')
+const secret: string = (process.env.SESSION_SECRET ?? '')
 
 export const studentSignup = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -20,12 +20,13 @@ export const studentSignup = async (req: AuthRequest, res: Response): Promise<vo
     const existingStudent = await Student.findOne({ where: { email } })
 
     if (existingStudent) {
-      res.json({
+      res.status(400).json({
         existingStudentError: 'Student already exists'
       })
     } else {
       const noOfStudent = (await Student.count() + 1).toString().padStart(4, '0')
-      const matricNo = `${faculty.toUpperCase().slice(0, 3)}/${department.toUpperCase().slice(0, 3)}/${noOfStudent}`
+      const yearOfEntry = new Date().getFullYear().toString()
+      const matricNo = `${department.toUpperCase().slice(0, 3)}/${yearOfEntry}/${noOfStudent}`
 
       const hashedPassword = await bcrypt.hash(password, 12)
 
@@ -40,7 +41,7 @@ export const studentSignup = async (req: AuthRequest, res: Response): Promise<vo
       })
 
       if (!createdStudent) {
-        res.json({
+        res.status(400).json({
           failedSignup: 'Student signup failed'
         })
       } else {
@@ -63,29 +64,29 @@ export const studentSignup = async (req: AuthRequest, res: Response): Promise<vo
 
           const mailOptions = {
             from: {
-              name: 'QuickGrade App',
-              address: 'quickgradedecagon@gmail.com'
+              name: 'EloQuence',
+              address: 'cxz3th@gmail.com'
             },
             to: email,
-            subject: 'Quick Grade App - Email Verification Code',
+            subject: 'EloQuence - Email Verification Code',
             text: `TOTP: ${student.otp}`,
-            html: `<h3>Hi there,
-        Thank you for signing up to QuickGrade. Copy the OTP below to verify your email:</h3>
+            html: `<h2>Dear ${student.firstName}</h2> <br>
+        <h3>Thank you for signing up to EloQuence. Copy the OTP below to verify your email:</h3>
         <h1>${student.otp}</h1>
-        <h3>This OTP will expire in 10 minutes. If you did not sign up for a QuickGrade account,
-        you can safely ignore this email. <br>
+        <h3>This OTP will expire in <bold>10 minutes</bold>. If you did not sign up for EloQuence account,
+        kindly ignore this email. <br>
         <br>
-        Best, <br>
-        The QuickGrade Team</h3>`
+        Best regards, <br>
+        The EloQuence Team</h3>`
           }
           await transporter.sendMail(mailOptions)
-          res.json({ successfulSignup: 'Student signup successful' })
+          res.json({ successfulSignup: 'Student signup successful', student })
         }
       }
     }
   } catch (error) {
-    res.json({
-      InternaServerError: 'Internal server error'
+    res.status(500).json({
+      InternaServerError: error
     })
   }
 }
@@ -97,11 +98,11 @@ export const verifyOTP = async (req: AuthRequest, res: Response): Promise<void> 
     const student = await Student.findOne({ where: { otp } })
     const email = student?.dataValues.email
     if (!student) {
-      res.json({ invalidOtp: 'Invalid otp' })
+      res.status(400).json({ invalidOtp: 'Invalid otp' })
     } else {
       const now = new Date()
       if (now > student.otpExpiration) {
-        res.json({ expiredOtpError: 'OTP has expired' })
+        res.status(400).json({ expiredOtpError: 'OTP has expired' })
         return
       }
 
@@ -109,25 +110,25 @@ export const verifyOTP = async (req: AuthRequest, res: Response): Promise<void> 
       // res.redirect('http://localhost:5173/students/reset-password')
       const mailOptions = {
         from: {
-          name: 'QuickGrade App',
-          address: 'quickgradedecagon@gmail.com'
+          name: 'EloQuence',
+          address: 'cxz3th@gmail.com'
         },
         to: email,
-        subject: 'Quick Grade App - Login Details',
+        subject: 'EloQuence - Login Details',
         text: 'Login Detail',
-        html: `<h3>Hi there,
-          Your Account has been successfully created and Email verification is successful. kindly find your login details below:</h3>
+        html: `<h2>Dear ${student.dataValues.firstName},</h2> <br>
+          <h3>Your Account has been successfully created and Email verification is successful. kindly find your login details below:
           <h2> MatricNo: ${student.dataValues.matricNo}</h2>
           
-          <h3>Best regards,<h3> <br>
-          <h3>The QuickGrade Team</h3>`
+          Best regards, <br>
+          The EloQuence Team </h3>`
       }
       await transporter.sendMail(mailOptions)
       // res.json({ successfulSignup: 'Student signup successful' })
       res.json({ OtpVerificationSuccess: 'OTP verified successfully' })
     }
   } catch (error) {
-    res.json({ internalServerError: 'Internal Server Error' })
+    res.status(500).json({ internalServerError: error })
   }
 }
 
@@ -137,14 +138,14 @@ export const studentLogin = async (req: AuthRequest, res: Response, next: NextFu
     const existingStudent = await Student.findOne({ where: { matricNo } })
 
     if (!existingStudent) {
-      res.json({
+      res.status(400).json({
         studentNotFoundError: 'Student not found'
       })
     } else {
       const isPasswordValid = await bcrypt.compare(password, existingStudent.dataValues.password)
 
       if (!isPasswordValid) {
-        res.json({
+        res.status(400).json({
           inValidPassword: 'Invalid password'
         })
       } else {
@@ -163,8 +164,8 @@ export const studentLogin = async (req: AuthRequest, res: Response, next: NextFu
       }
     }
   } catch (error: any) {
-    res.json({
-      internalServerError: `Error: ${error}`
+    res.status(500).json({
+      internalServerError: error
     })
   }
 }
@@ -174,7 +175,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   const user = await Student.findOne({ where: { email } })
 
   if (!user) {
-    res.json({ userNotFoundError: 'User not found' })
+    res.status(404).json({ userNotFoundError: 'User not found' })
     return
   } else {
     const token = crypto.randomBytes(20).toString('hex')
@@ -183,17 +184,17 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     await user.save()
 
     const mailOptions = {
-      from: 'quickgradedecagon@gmail.com',
+      from: 'cxz3th@gmail.com',
       to: email,
       subject: 'Password Reset',
       // text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://${req.headers.host}/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://localhost:5173/students/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
+      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://localhost:4000/students/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
     }
 
     await transporter.sendMail(mailOptions)
   }
 
-  res.json({ linkSentSuccessfully: 'An email has been sent to the address provided with further instructions.' })
+  res.status(200).json({ linkSentSuccessfully: 'An email has been sent to the address provided with further instructions.' })
 }
 
 export const resetPasswordToken = async (req: Request, res: Response): Promise<void> => {
@@ -235,7 +236,7 @@ export const updateStudentPassword = async (req: AuthRequest, res: Response): Pr
     const student = await Student.findByPk(studentId)
 
     if (!student) {
-      res.json({ unknownStudent: 'User not found' })
+      res.status(404).json({ unknownStudent: 'User not found' })
     } else {
       // Update the user's password
       student.dataValues.password = newPassword
@@ -246,7 +247,7 @@ export const updateStudentPassword = async (req: AuthRequest, res: Response): Pr
       res.json({ passwordChangedSuccessfully: 'Password updated successfully' })
     }
   } catch (error) {
-    res.json({ error: 'Internal Server Error' })
+    res.status(500).json({ internalServerError: error })
   }
 }
 
@@ -266,7 +267,7 @@ export const getStudentDashboard = async (req: AuthRequest, res: Response): Prom
       res.json({ courses })
     }
   } catch (error) {
-    res.json({ internalServeError: 'internal server error' })
+    res.status(500).json({ internalServeError: error })
   }
 }
 
@@ -286,8 +287,7 @@ export const getExamTimetable = async (req: AuthRequest, res: Response): Promise
       res.json({ exams })
     }
   } catch (error) {
-    res.json({ internalServerError: error })
-    // res.status(500).json({ error: errorMessage });
+    res.status(500).json({ internalServerError: error })
   }
 }
 
@@ -302,7 +302,7 @@ export const takeExam = async (req: AuthRequest, res: Response): Promise<void> =
       res.json({ questions, examsDetail })
     }
   } catch (error) {
-    res.json({ internalServerError: 'internal server error' })
+    res.status(500).json({ internalServerError: error })
   }
 }
 
@@ -358,6 +358,7 @@ export const getObjectivesScore = async (req: AuthRequest, res: Response): Promi
       res.json({ StudentResult, enrolledExam })
     })
   } catch (error) {
+    res.status(500).json({ internalServerError: error })
   }
 }
 export const logout = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -367,7 +368,6 @@ export const logout = async (req: AuthRequest, res: Response): Promise<void> => 
     // Send a success response
     res.status(200).json({ message: 'Logout successful' })
   } catch (error) {
-    const errorMessage = 'Internal Server Error'
-    res.status(500).json({ error: errorMessage })
+    res.status(500).json({ error: error })
   }
 }

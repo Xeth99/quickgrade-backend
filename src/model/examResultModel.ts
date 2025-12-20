@@ -2,7 +2,19 @@ import { DataTypes, Model } from 'sequelize'
 import sequelize from '../database/database'
 import { v4 as uuidv4 } from 'uuid'
 
-class ExamResult extends Model {}
+class ExamResult extends Model {
+  static associate(models: any): void{
+    ExamResult.belongsTo(models.Exam, {
+      foreignKey: 'examId', as: 'exam'
+    })
+    ExamResult.belongsTo(models.Student, {
+      foreignKey: 'studentId', as: 'student'
+    })
+    ExamResult.belongsTo(models.Lecturer, {
+      foreignKey: 'lecturerId', as: 'lecturer'
+    })
+  }
+}
 
 ExamResult.init(
   {
@@ -31,6 +43,17 @@ ExamResult.init(
     totalMarks: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM('PUBLISHED', 'UPDATED')
+    },
+    lastUpdatedBy: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Lecturer',
+        key: 'lecturerId'
+      }
     }
   },
   {

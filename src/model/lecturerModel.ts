@@ -26,6 +26,10 @@ class Lecturer extends Model {
       through: 'LecturerCourses',
       as: 'courses'
     })
+    Lecturer.belongsTo(models.Department, {
+      foreignKey: 'departmentId',
+      as: 'department'
+    })
   }
 }
 

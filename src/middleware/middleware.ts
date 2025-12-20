@@ -2,7 +2,7 @@ import { type Request, type Response, type NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import Student from '../model/studentModel'
 
-const secret: string = (process.env.secret ?? '')
+const secret: string = (process.env.SESSION_SECRET ?? '')
 
 interface AuthRequest extends Request {
   student?: { studentId: string } // Add the user property

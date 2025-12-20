@@ -15,11 +15,11 @@ export const createCourse = async (req: Request, res: Response): Promise<void> =
       faculty
     })
     if (!newCourse) {
-      res.json({
+      res.status(400).json({
         message: 'unable to create course'
       })
     } else {
-      res.json({
+      res.status(200).json({
         message: 'course created succesfully'
       })
     }
