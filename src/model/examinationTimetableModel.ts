@@ -6,12 +6,12 @@ import Courses from "./courseModel";
 import { v4 as uuidv4 } from "uuid";
 
 enum ExamStatus {
-  PENDING = "pending",
-  COMPLETED = "completed",
-  UNCOMPLETED = "uncompleted",
-  ONGOING = "ongoing",
-  POSTPONED = "postponed",
-  CANCELLED = "cancelled",
+  Pending = "pending",
+  Completed = "completed",
+  Uncompleted = "uncompleted",
+  Ongoing = "ongoing",
+  Postponed = "postponed",
+  Cancelled = "cancelled",
 }
 
 class ExaminationTimetable extends Model {

@@ -1,14 +1,45 @@
-import { type Request, type Response } from 'express'
-import Courses from '../model/courseModel'
-import Student from '../model/studentModel'
-import Exam from '../model/examModel'
-import { ExaminationTimetable } from '../model/examinationTimetableModel'
+import { type Request, type Response } from "express";
+import Courses from "../model/courseModel";
+import Exam from "../model/examModel";
+import { ExaminationTimetable } from "../model/examinationTimetableModel";
 
-export const getExamTimetable = async (req: Request, res: Response): Promise<any> => {
+export const createExamTimetable = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
-    const {  sessionId, semester } = req.params
-    if ( !sessionId || !semester) {
-      return res.status(400).json({ message: 'Course code, Session and Semester are required' })
+    const { examId, courseId, sessionId, examDate, status } = req.body;
+    if (!examId || !courseId || !sessionId || !examDate || !status) {
+      res.status(400).json({ message: "All fields are required" });
+    }
+    const examTimetable = await ExaminationTimetable.create({
+      examId,
+      courseId,
+      sessionId,
+      examDate,
+      status,
+    });
+    res
+      .status(200)
+      .json({
+        message: "Examination Timetable created successfully",
+        data: examTimetable,
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error });
+  }
+};
+export const getExamTimetable = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { sessionId, semester } = req.params;
+    if (!sessionId || !semester) {
+      return res
+        .status(400)
+        .json({ message: "Course code, Session and Semester are required" });
     }
     const examTimetable = await ExaminationTimetable.findAll({
       where: {
@@ -17,24 +48,28 @@ export const getExamTimetable = async (req: Request, res: Response): Promise<any
       include: [
         {
           model: Exam,
-          as: 'exam',
-          attributes: ['examId', 'examDuration', 'examInstruction', 'semester', 'examDate'],
+          as: "exam",
+          attributes: [
+            "examId",
+            "examDuration",
+            "examInstruction",
+            "semester",
+            "examDate",
+          ],
           where: {
-            semester
+            semester,
           },
           include: [
             {
               model: Courses,
-              attributes: ['courseCode', 'courseTitle']
-            }
-          ]
-
+              attributes: ["courseCode", "courseTitle"],
+            },
+          ],
         },
-      ]
-    })
-      res.status(200).json(examTimetable)
-    }
-  catch (error) {
+      ],
+    });
+    res.status(200).json(examTimetable);
+  } catch (error) {
     res.status(500).json({ error });
   }
-}
+};

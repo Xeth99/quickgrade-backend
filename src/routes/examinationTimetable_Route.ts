@@ -1,9 +1,13 @@
-import express from 'express'
-import { getExamTimetable } from '../controller/examinationTimetableController'
+import express from "express";
+import {
+  createExamTimetable,
+  getExamTimetable,
+} from "../controller/examinationTimetableController";
 
-const router = express.Router()
+const router = express.Router();
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.get('/', getExamTimetable)
+router.post("/", createExamTimetable);
+router.get("/", getExamTimetable);
 
-export default router
+export default router;

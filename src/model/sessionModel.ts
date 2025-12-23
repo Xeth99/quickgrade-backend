@@ -36,6 +36,7 @@ Session.init(
   {
     sequelize,
     modelName: "Session",
+    tableName: "sessions",
   }
 );
 

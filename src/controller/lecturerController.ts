@@ -329,6 +329,7 @@ export const setExamQuestions = async (
       examDuration,
       examInstruction,
       examDate,
+      objectiveScore,
       totalScore,
       totalNoOfQuestions,
     } = req.body;
@@ -342,6 +343,7 @@ export const setExamQuestions = async (
       !examDuration ||
       !examInstruction ||
       !examDate ||
+      !objectiveScore ||
       !totalScore ||
       !totalNoOfQuestions
     ) {
@@ -357,12 +359,13 @@ export const setExamQuestions = async (
       examDuration,
       examInstruction,
       examDate,
+      objectiveScore,
       totalScore,
       totalNoOfQuestions,
     });
     res.status(201).json({
       message: "Exam created successfully",
-      examId: createdExam.dataValues.examId,
+      createdExam,
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to create exam" });
