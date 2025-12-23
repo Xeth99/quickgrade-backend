@@ -6,8 +6,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 class Semester extends Model {
   static associate (models: any): void {
-    Semester.belongsTo(Session, { foreignKey: 'sessionId', as: 'semesterSession' })
-    Semester.hasMany(Courses, { foreignKey: 'semester', as: 'semesterCourses' })
+    Semester.belongsTo(Session, { foreignKey: 'sessionId', as: 'session' })
+    Semester.hasMany(Courses, { foreignKey: 'semesterId', as: 'courses' })
   }
 }
 
@@ -17,6 +17,14 @@ Semester.init(
       type: DataTypes.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
+      allowNull: false
+    },
+    semester: {
+      type: DataTypes.ENUM('First Semester', 'Second Semester'),
+      allowNull: false
+    },
+    sessionId: {
+      type: DataTypes.UUID,
       allowNull: false
     }
 

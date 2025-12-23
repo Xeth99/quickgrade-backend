@@ -41,7 +41,7 @@ sequelize
     console.log('Unable to connect to the database:', err)
   })
 
-sequelize.sync().then(() => {
+sequelize.sync({alter: false}).then(() => {
     console.log('All models were synchronized successfully.')
   })
 const app = express()

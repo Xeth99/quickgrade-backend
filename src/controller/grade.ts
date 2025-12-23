@@ -20,16 +20,29 @@ function calculateGrade (gradeValue: number): string {
 
 export const grades = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { gradingId, studentId, responseId, department, grade } = req.body
+    const { gradingId, studentId, responseId, examId, courseCode, semester, department, objectiveGrade, fillInTheGapGrade, theoryGrade, lastUpdatedBy, totalGrade } = req.body
 
-    if (!gradingId || !studentId || !responseId || !department || !grade) {
-      res.status(400).json({ error: 'Invalid input data' })
+    if (!studentId || !responseId || !courseCode || !semester || !department || totalGrade === undefined) {
+      res.status(400).json({ message: 'Invalid input data' })
       return
     }
 
-    const studentGrade = calculateGrade(grade)
+    const studentGrade = calculateGrade(totalGrade)
 
-    const gradeData = await Grading.create({ gradingId, studentId, responseId, department, grade: studentGrade })
+    const gradeData = await Grading.create({
+      gradingId,
+      studentId,
+      responseId,
+      examId,
+      courseCode,
+      semester,
+      objectiveGrade,
+      fillInTheGapGrade,
+      theoryGrade,
+      department,
+      lastUpdatedBy,
+      grade: studentGrade
+    })
     res.status(200).json(gradeData)
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })

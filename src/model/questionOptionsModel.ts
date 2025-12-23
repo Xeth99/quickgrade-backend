@@ -1,11 +1,12 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelize from '../database/database'
 import { v4 as uuidv4 } from 'uuid'
+import Question from './questionModel'
 
 class questionOptions extends Model {
   static associate (models: any): void {
     // Define the many-to-many relationship with the Course model
-    questionOptions.belongsTo(models.Question, {
+    questionOptions.belongsTo(Question, {
       foreignKey: 'questionId',
       as: 'question'
     })

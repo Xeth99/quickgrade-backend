@@ -8,7 +8,7 @@ import Faculty from "./facultyModel"
 import Exam from "./examModel"
 
 class Department extends Model {
-    static associate(models: any): void {
+    static associate() {
         Department.belongsTo(Faculty, { foreignKey: 'facultyId', as: 'faculty' })
         Department.hasMany(Lecturer, { foreignKey: 'departmentId', as: 'Lecturer' });
         Department.hasMany(Courses, { foreignKey: 'departmentId', as: 'Courses' });

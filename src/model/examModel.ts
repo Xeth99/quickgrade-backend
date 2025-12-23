@@ -1,30 +1,61 @@
-import { DataTypes, Model } from 'sequelize'
-import sequelize from '../database/database'
-import { v4 as uuidv4 } from 'uuid'
-import Lecturer from './lecturerModel'
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../database/database";
+import { v4 as uuidv4 } from "uuid";
+import Lecturer from "./lecturerModel";
+import Courses from "./courseModel";
+import { ExaminationTimetable } from "./examinationTimetableModel";
+import ExamSection from "./examSectionModel";
+import Department from "./departmentModel";
+import Session from "./sessionModel";
+import Semester from "./semesterModel";
+import Question from "./questionModel";
 class Exam extends Model {
-  static associate (models: any): void {
-    Exam.belongsTo(models.Courses, {
-      foreignKey: 'courseCode',
-      as: 'course'
-    })
-    Exam.belongsTo(models.Lecturer, {
-      foreignKey: 'lecturerId',
-      as: 'lecturer'
-    })
-    Exam.belongsTo(models.Department, {
-      foreignKey: 'departmentId', as: 'department'
-    })
-    Exam.belongsTo(models.Session, {
-      foreignKey: 'sessionId', as: 'session'
-    })
-    Exam.belongsTo(models.Semester, {
-      foreignKey: 'semesterId', as: 'semester'
-    })
-    Exam.hasOne(models.ExaminationTimetable, {
-      foreignKey: 'examId',
-      as: 'examinationTimetable'
-    })
+  declare questionId: string;
+  declare examId: string;
+  declare lecturerId: string;
+  declare courseId: string;
+  declare departmentId: string;
+  declare sessionId: string;
+  declare semesterId: string;
+  declare examDuration: number;
+  declare examInstruction: string;
+  declare examDate: Date;
+  declare totalScore: number;
+  declare totalNoOfQuestions: number;
+
+  static associate() {
+    Exam.belongsTo(Courses, {
+      foreignKey: "courseId",
+      as: "course",
+    });
+    Exam.belongsTo(Lecturer, {
+      foreignKey: "lecturerId",
+      as: "lecturer",
+    });
+    Exam.belongsTo(Department, {
+      foreignKey: "departmentId",
+      as: "department",
+    });
+    Exam.belongsTo(Session, {
+      foreignKey: "sessionId",
+      as: "session",
+    });
+    Exam.belongsTo(Semester, {
+      foreignKey: "semesterId",
+      as: "semester",
+    });
+    Exam.hasOne(ExaminationTimetable, {
+      foreignKey: "examId",
+      as: "examinationTimetable",
+    });
+    Exam.hasMany(ExamSection, {
+      foreignKey: "examId",
+      as: "examSection",
+    });
+    Exam.hasMany(Question, {
+      foreignKey: "examId",
+      as: "questions",
+    });
   }
 }
 
@@ -37,85 +68,51 @@ Exam.init(
     },
     courseId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     lecturerId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     departmentId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     sessionId: {
       type: DataTypes.UUID,
-      allowNull: false
-    }, 
+      allowNull: false,
+    },
     semesterId: {
       type: DataTypes.UUID,
-      allowNull: false
-    }, 
+      allowNull: false,
+    },
     examDuration: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     examInstruction: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
     },
-    // courseCode: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // firstSection: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // secondSection: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // thirdSection: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // courseTitle: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-
-    // semester: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // session: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // faculty: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // department: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false
-    // },
-    // examDate: {
-    //   type: DataTypes.DATE,
-    //   allowNull: false
-    // },
+    examDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    objectiveScore: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     totalScore: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
     totalNoOfQuestions: {
-      type: DataTypes.INTEGER
-    }
-
+      type: DataTypes.INTEGER,
+    },
   },
   {
     sequelize,
-    modelName: 'Exam'
+    modelName: "Exam",
   }
-)
-export default Exam
+);
+export default Exam;

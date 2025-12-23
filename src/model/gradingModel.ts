@@ -1,8 +1,19 @@
-import { DataTypes, Model } from 'sequelize'
-import sequelize from '../database/database'
-import { v4 as uuidv4 } from 'uuid'
-import Exam from './examModel'
-class Grading extends Model {}
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../database/database";
+import { v4 as uuidv4 } from "uuid";
+import Exam from "./examModel";
+import StudentResponse from "./studentResponseModel";
+import Student from "./studentModel";
+class Grading extends Model {
+  static associate() {
+    Grading.belongsTo(Exam, { foreignKey: "examId", as: "exam" });
+    Grading.belongsTo(StudentResponse, {
+      foreignKey: "responseId",
+      as: "studentResponse",
+    });
+    Grading.belongsTo(Student, { foreignKey: "studentId", as: "student" });
+  }
+}
 
 Grading.init(
   {
@@ -10,44 +21,56 @@ Grading.init(
       type: DataTypes.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
     },
     studentId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
-    courseCode: {
-      type: DataTypes.STRING,
-      allowNull: false
+    responseId: {
+      type: DataTypes.UUID,
+      allowNull: false,
     },
     examId: {
       type: DataTypes.UUID,
-      references: {
-        model: Exam,
-        key: 'examId'
-      }
+    },
+    courseCode: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    department: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     semester: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
     },
     objectiveGrade: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+    },
+    fillInTheGapGrade: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     theoryGrade: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
     },
     totalGrade: {
       type: DataTypes.INTEGER,
-      allowNull: true
-    }
+      allowNull: true,
+    },
+    lastUpdatedBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    modelName: 'Grading'
+    modelName: "Grading",
   }
-)
+);
 
-export default Grading
+export default Grading;

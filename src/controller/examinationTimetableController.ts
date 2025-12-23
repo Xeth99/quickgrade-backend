@@ -6,41 +6,30 @@ import { ExaminationTimetable } from '../model/examinationTimetableModel'
 
 export const getExamTimetable = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { coursecode, session, semester } = req.params
-    if (!coursecode || !session || !semester) {
-      return res.status(400).json({ error: 'Course code, Session and Semester are required' })
+    const {  sessionId, semester } = req.params
+    if ( !sessionId || !semester) {
+      return res.status(400).json({ message: 'Course code, Session and Semester are required' })
     }
-    const examTimetable = await Exam.findAll({
+    const examTimetable = await ExaminationTimetable.findAll({
+      where: {
+        sessionId,
+      },
       include: [
         {
-          model: ExaminationTimetable,
-          attributes: ['id', 'course code', 'date', 'status'],
-          where: {
-            session,
-            semester
-          }
-
-        },
-
-        {
-          model: Courses,
-          attributes: ['courseCode', 'courseTitle'],
-          where: {
-            coursecode
-          }
-        },
-        {
-          model: Student,
-          attributes: ['studentId', 'department', 'faculty', 'level']
-        },
-        {
           model: Exam,
-          attributes: ['examId, examDuration, courseCode, courseTitle'],
+          as: 'exam',
+          attributes: ['examId', 'examDuration', 'examInstruction', 'semester', 'examDate'],
           where: {
-            session,
             semester
-          }
-        }
+          },
+          include: [
+            {
+              model: Courses,
+              attributes: ['courseCode', 'courseTitle']
+            }
+          ]
+
+        },
       ]
     })
       res.status(200).json(examTimetable)

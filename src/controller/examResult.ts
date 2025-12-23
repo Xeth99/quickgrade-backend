@@ -13,7 +13,7 @@ export const getExamResults = async (req: Request, res: Response): Promise<any> 
     const { courseCode, session, semester } = req.params
     if (!courseCode || !session || !semester) {
       return res.status(400).json({
-       error: "Course code, Session, and Semester are required"
+       message: "Course code, Session, and Semester are required"
      })
     } 
       const examResults = await Grading.findAll({

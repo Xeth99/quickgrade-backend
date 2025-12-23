@@ -1,9 +1,30 @@
-import { DataTypes, Model } from 'sequelize'
-import sequelize from '../database/database'
-import { v4 as uuidv4 } from 'uuid'
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../database/database";
+import { v4 as uuidv4 } from "uuid";
+import Grading from "./gradingModel";
+import Student from "./studentModel";
+import Exam from "./examModel";
+import Question from "./questionModel";
 
 class StudentResponse extends Model {
-  static isCorrect: any
+  static associate() {
+    StudentResponse.hasMany(Grading, {
+      foreignKey: "responseId",
+      as: "gradings",
+    });
+    StudentResponse.belongsTo(Student, {
+      foreignKey: "studentId",
+      as: "student",
+    });
+    StudentResponse.belongsTo(Exam, {
+      foreignKey: "examId",
+      as: "exam",
+    });
+    StudentResponse.belongsTo(Question, {
+      foreignKey: "questionId",
+      as: "question",
+    });
+  }
 }
 
 StudentResponse.init(
@@ -12,41 +33,41 @@ StudentResponse.init(
       type: DataTypes.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
     },
     studentId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     examId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     questionId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     responseText: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     courseCode: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     semester: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     isCorrect: {
       type: DataTypes.BOOLEAN,
-      allowNull: false
-    }
+      allowNull: false,
+    },
   },
   {
     sequelize,
-    modelName: 'StudentResponse'
+    modelName: "StudentResponse",
   }
-)
+);
 
-export default StudentResponse
+export default StudentResponse;

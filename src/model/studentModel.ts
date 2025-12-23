@@ -1,34 +1,34 @@
-import { DataTypes, Model } from 'sequelize'
-import sequelize from '../database/database'
-import Courses from '../model/courseModel'
-import { v4 as uuidv4 } from 'uuid'
-import Department from './departmentModel'
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../database/database";
+import Courses from "../model/courseModel";
+import { v4 as uuidv4 } from "uuid";
+import Department from "./departmentModel";
 
 class Student extends Model {
-  studentId!: string
-  firstName!: string
-  lastName!: string
-  email!: string
-  matricNo!: string
-  password!: string
-  faculty!: string
-  department!: string
-  otp!: string
-  otpSecret!: string | null
-  otpExpiration!: Date
-  isVerified!: boolean
-  resetPasswordToken!: string | null
-  resetPasswordExpiration!: Date | null
+  studentId!: string;
+  firstName!: string;
+  lastName!: string;
+  email!: string;
+  matricNo!: string;
+  password!: string;
+  faculty!: string;
+  department!: string;
+  otp!: string;
+  otpSecret!: string | null;
+  otpExpiration!: Date;
+  isVerified!: boolean;
+  resetPasswordToken!: string | null;
+  resetPasswordExpiration!: Date | null;
 
-  static associate (models: any): void {
+  static associate() {
     Student.belongsToMany(Courses, {
-      through: 'StudentCourses',
-      as: 'courses'
-    })
+      through: "StudentCourses",
+      as: "courses",
+    });
     Student.belongsTo(Department, {
-      foreignKey: 'departmentId',
-      as: 'department'
-    })
+      foreignKey: "departmentId",
+      as: "department",
+    });
   }
 }
 
@@ -38,65 +38,65 @@ Student.init(
       type: DataTypes.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
     },
     firstName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     lastName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     matricNo: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     faculty: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     department: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     otp: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     otpSecret: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     otpExpiration: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
     },
     isVerified: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
     },
     resetPasswordToken: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     resetPasswordExpiration: {
       type: DataTypes.DATE,
-      allowNull: true
-    }
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    modelName: 'Student'
+    modelName: "Student",
   }
-)
+);
 
-export default Student
+export default Student;

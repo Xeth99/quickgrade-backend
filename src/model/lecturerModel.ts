@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize'
 import sequelize from '../database/database'
 import { v4 as uuidv4 } from 'uuid'
 import Courses from './courseModel'
+import Department from './departmentModel'
 
 class Lecturer extends Model {
   lecturerId!: string
@@ -23,10 +24,11 @@ class Lecturer extends Model {
   static associate (models: any): void {
     // Define the many-to-many relationship with the Course model
     Lecturer.belongsToMany(Courses, {
+      foreignKey: 'lecturerId',
       through: 'LecturerCourses',
       as: 'courses'
     })
-    Lecturer.belongsTo(models.Department, {
+    Lecturer.belongsTo(Department, {
       foreignKey: 'departmentId',
       as: 'department'
     })
